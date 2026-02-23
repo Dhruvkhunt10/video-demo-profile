@@ -1,0 +1,380 @@
+body {
+  margin: 0;
+  background: #141414;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8));
+  color: white;
+}
+.left {
+  display: flex;
+  align-items: center;
+}
+.logo {
+  font-size: 26px;
+  font-weight: bold;
+  color: #cde800;
+  cursor: pointer;
+}
+.right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.profile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.profile img {
+  width: 34px;
+  height: 34px;
+  border-radius: 4px;
+}
+.caret {
+  font-size: 10px;
+}
+.dropdown {
+  position: absolute;
+  right: 0;
+  top: 45px;
+  width: 220px;
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 10px 0;
+  border-radius: 4px;
+}
+.dropdownUser {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 15px;
+}
+.dropdownUser img {
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+}
+.dropdownItem {
+  padding: 10px 15px;
+  font-size: 14px;
+  cursor: pointer;
+  color: #e5e5e5;
+}
+.dropdownItem:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+.logout {
+  color: white;
+}
+.divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 8px 0;
+}
+
+.sectionTitle {
+  margin: 0 24px 0px;
+  font-size: 22px;
+  font-weight: 600;
+  color: #fff;
+
+  /* glass text glow */
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.25);
+}
+
+.paidRowAll {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(245px, 1fr));
+  gap: 18px;
+  padding: 20px;
+}
+
+.paidRow {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  padding: 20px;
+  scroll-behavior: smooth;
+}
+
+.paidRow::-webkit-scrollbar {
+  height: 8px;
+}
+.paidRow::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 10px;
+}
+
+.paidCard {
+  min-width: 260px;
+  max-width: 260px;
+  background: #111;
+  border-radius: 16px;
+  overflow: hidden;
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+/* ✨ Hover lift animation */
+.paidCard:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.6);
+}
+
+.paidCard {
+  min-width: 260px;
+  max-width: 260px;
+  border-radius: 18px;
+  color: #fff;
+
+  /* 🌈 Light gradient glass */
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.18),
+    rgba(255, 255, 255, 0.05)
+  );
+
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  border: 1px solid rgba(255, 255, 255, 0.25);
+
+  box-shadow:
+    0 10px 35px rgba(0, 0, 0, 0.35),
+    inset 0 0 0.5px rgba(255, 255, 255, 0.4);
+
+  display: flex;
+  flex-direction: column;
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.paidCard::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.25),
+    transparent 70%
+  );
+  opacity: 0;
+  transition: 0.6s;
+}
+
+.paidCard:hover::after {
+  opacity: 1;
+  transform: translateX(100%);
+}
+
+/* ✨ Hover lift */
+.paidCard:hover {
+  transform: translateY(-12px) scale(1.03);
+  box-shadow:
+    0 18px 45px rgba(0, 0, 0, 0.6),
+    inset 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+/* Top image */
+.cardTop {
+  position: relative;
+  height: 170px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 👇 Avatar style instead of full cover */
+.cardTop img {
+  width: 110px;
+  height: 110px;
+  object-fit: cover; /* keeps face */
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.4);
+  background: #222;
+  z-index: 1;
+}
+
+/* Gradient overlay for glass depth */
+.cardTop::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  opacity: 0.35;
+}
+
+/* Role badge */
+.role {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(255, 152, 0, 0.9);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: bold;
+  backdrop-filter: blur(6px);
+}
+
+/* Body */
+.cardBody {
+  padding: 14px;
+  flex-grow: 1;
+}
+
+.cardBody h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.company {
+  font-size: 13px;
+  color: #ddd;
+  margin: 4px 0;
+}
+
+.job {
+  font-size: 13px;
+  color: #ccc;
+  margin-bottom: 10px;
+}
+
+.infoRow {
+  font-size: 12px;
+  margin-bottom: 6px;
+  color: #e0e0e0;
+}
+
+/* ✂️ Ellipsis */
+.ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 🦴 Glass Skeleton */
+.skeleton {
+  background: rgba(255, 255, 255, 0.06);
+  animation: pulse 1.4s infinite ease-in-out;
+}
+
+.skeletonBox {
+  height: 160px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.skeletonText {
+  height: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  margin-bottom: 10px;
+  border-radius: 4px;
+}
+
+.skeletonText.title {
+  height: 16px;
+  width: 70%;
+}
+
+.skeletonText.small {
+  width: 90%;
+}
+
+.skeletonBtn {
+  flex: 1;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+
+/* Pulse animation */
+@keyframes pulse {
+  0% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.55;
+  }
+}
+
+.searchWrapper {
+  display: flex;
+  justify-content: end;
+  padding: 20px;
+}
+
+.searchBox {
+  width: 40%;
+  max-width: 400px;
+  background: #111;
+  border: 1px solid #2a2a2a;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  transition: 0.3s;
+}
+
+.searchBox:focus-within {
+  border-color: #00d4ff;
+  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
+}
+
+.searchIcon {
+  font-size: 18px;
+  margin-right: 10px;
+  color: #aaa;
+}
+
+.searchBox input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: white;
+  font-size: 14px;
+}
+
+.clearBtn {
+  background: transparent;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.clearBtn:hover {
+  color: #ff4d4f;
+}
+
+.noData {
+  width: 100%;
+  text-align: center;
+  padding: 40px 0;
+  color: #aaa;
+  font-size: 14px;
+  opacity: 0.8;
+}
