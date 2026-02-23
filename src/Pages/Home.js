@@ -2,7 +2,6 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
-import VideoRow from "../components/VideoRow";
 
 const parseJwt = (token) => {
   try {
