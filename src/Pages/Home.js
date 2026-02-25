@@ -88,7 +88,7 @@ const Home = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const newData = res?.data?.result || [];
@@ -256,40 +256,49 @@ const Home = () => {
             <div className="paidRow">
               {loadingUserPersonlizationVideos
                 ? Array.from({ length: 10 }).map((_, i) => (
-                  <div className="paidCard skeleton" key={i}>
-                    <div className="cardTop skeletonBox"></div>
-                    <div className="cardBody">
-                      <div className="skeletonText title"></div>
-                      <div className="skeletonText"></div>
-                      <div className="skeletonText small"></div>
-                      <div className="skeletonText small"></div>
-                      <div className="skeletonText small"></div>
-                    </div>
-                  </div>
-                ))
-                : userPersonlizationProfile.map((user) => (
-                  <div className="paidCard" key={user.id}>
-                    <div className="cardTop">
-                      <img
-                        src={user.profileImage}
-                        alt={`${user.firstName} ${user.lastName}`}
-                      />
-                      <span className="role paid">Paid</span>
-                    </div>
-
-                    <div className="cardBody">
-                      <h3 className="ellipsis">
-                        {user.firstName} {user.lastName}
-                      </h3>
-
-                      <p className="company ellipsis">{user.companyname}</p>
-                      <p className="job ellipsis">{user.designation}</p>
-                      <div className="infoRow ellipsis">
-                        📍 {user.location}
+                    <div className="paidCard skeleton" key={i}>
+                      <div className="cardTop skeletonBox"></div>
+                      <div className="cardBody">
+                        <div className="skeletonText title"></div>
+                        <div className="skeletonText"></div>
+                        <div className="skeletonText small"></div>
+                        <div className="skeletonText small"></div>
+                        <div className="skeletonText small"></div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                : userPersonlizationProfile.map((user) => (
+                    <div
+                      className="paidCard"
+                      key={user.id}
+                      onClick={() => {
+                        navigate("profile-details", {
+                          state: { id: user.userId },
+                        });
+                      }}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <div className="cardTop">
+                        <img
+                          src={user.profileImage}
+                          alt={`${user.firstName} ${user.lastName}`}
+                        />
+                        <span className="role paid">Paid</span>
+                      </div>
+
+                      <div className="cardBody">
+                        <h3 className="ellipsis">
+                          {user.firstName} {user.lastName}
+                        </h3>
+
+                        <p className="company ellipsis">{user.companyname}</p>
+                        <p className="job ellipsis">{user.designation}</p>
+                        <div className="infoRow ellipsis">
+                          📍 {user.location}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
             </div>
           </div>
           <div style={{ marginTop: "16px" }}>
@@ -312,7 +321,16 @@ const Home = () => {
                 <div className="noData">No data found</div>
               ) : (
                 paidProfile.map((user) => (
-                  <div className="paidCard" key={user.id}>
+                  <div
+                    className="paidCard"
+                    key={user.id}
+                    onClick={() => {
+                      navigate("profile-details", {
+                        state: { id: user.uid },
+                      });
+                    }}
+                    style={{ cursor: "pointer" }}
+                  >
                     <div className="cardTop">
                       <img src={user.profilePic} alt={user.name} />
                       <span className={`role ${user.role?.toLowerCase()}`}>
@@ -352,7 +370,16 @@ const Home = () => {
         <h2 className="sectionTitle">All Members</h2>
         <div className={allMembers?.length === 0 ? "paidRow" : "paidRowAll"}>
           {allMembers.map((user) => (
-            <div className="paidCard" key={user.id}>
+            <div
+              className="paidCard"
+              key={user.id}
+              onClick={() => {
+                navigate("profile-details", {
+                  state: { id: user.uid },
+                });
+              }}
+              style={{ cursor: "pointer" }}
+            >
               <div className="cardTop">
                 <img src={user.profilePic} alt={user.name} />
                 <span className={`role ${user.role?.toLowerCase()}`}>
