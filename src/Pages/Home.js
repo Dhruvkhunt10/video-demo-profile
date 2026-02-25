@@ -131,13 +131,10 @@ const Home = () => {
 
   const handlePaidScroll = async (e) => {
     const el = e.target;
-
     if (loadingMorePaid || !paidHasMore) return;
-
     if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 100) {
       const t = await getValidToken();
       if (!t) return;
-
       const nextPage = paidPageNumber + 1;
       setPaidPageNumber(nextPage);
       paidMembers(t, nextPage, true);
@@ -159,12 +156,8 @@ const Home = () => {
           },
         },
       );
-
       const newData = res?.data?.result || [];
-
       setAllMembers((prev) => (append ? [...prev, ...newData] : newData));
-
-      // if less than page size → no more data
       setHasMore(newData.length === 10);
     } catch (err) {
       console.error(err);
@@ -182,7 +175,6 @@ const Home = () => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchText);
     }, 500);
-
     return () => clearTimeout(timer);
   }, [searchText]);
 
@@ -190,12 +182,10 @@ const Home = () => {
     const runSearch = async () => {
       const t = await getValidToken();
       if (!t) return navigate("/login");
-
       setPageNumber(1);
       setHasMore(true);
       search(t, debouncedSearch, 1, false);
     };
-
     runSearch();
   }, [debouncedSearch]);
 
@@ -203,8 +193,7 @@ const Home = () => {
     const init = async () => {
       const t = await getValidToken();
       if (!t) return navigate("/login");
-
-      paidMembers(t, 1, false); // page 1
+      paidMembers(t, 1, false);
       userPersonlization(t);
     };
     init();
@@ -213,15 +202,12 @@ const Home = () => {
   useEffect(() => {
     const handleScroll = async () => {
       if (loadingMore || !hasMore) return;
-
       const scrollTop = window.scrollY;
       const windowHeight = window.innerHeight;
       const fullHeight = document.documentElement.scrollHeight;
-
       if (scrollTop + windowHeight >= fullHeight - 200) {
         const t = await getValidToken();
         if (!t) return;
-
         const nextPage = pageNumber + 1;
         setPageNumber(nextPage);
         search(t, debouncedSearch, nextPage, true);
@@ -231,6 +217,15 @@ const Home = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [pageNumber, loadingMore, hasMore, debouncedSearch]);
+
+  useEffect(() => {
+    const isFirstLoad = sessionStorage.getItem("home_reloaded");
+
+    if (!isFirstLoad) {
+      sessionStorage.setItem("home_reloaded", "true");
+      window.location.reload();
+    }
+  }, []);
 
   return (
     <div className="home">
