@@ -21,9 +21,14 @@ const Home = () => {
   const [loadingUserPersonlizationVideos, setLoadingUserPersonlizationVideos] =
     useState(false);
   const [allMembers, setAllMembers] = useState([]);
-  const [loadingAllMembers, setLoadingAllMembers] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [pageNumber, setPageNumber] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [paidPageNumber, setPaidPageNumber] = useState(1);
+  const [paidHasMore, setPaidHasMore] = useState(true);
+  const [loadingMorePaid, setLoadingMorePaid] = useState(false);
 
   const renewToken = async (loginToken, refreshToken) => {
     try {
@@ -67,12 +72,16 @@ const Home = () => {
     return user.token;
   };
 
-  const paidMembers = async (token) => {
+  const paidMembers = async (token, page = 1, append = false) => {
     try {
-      setLoadingPaidProfile(true);
+      if (append) {
+        setLoadingMorePaid(true);
+      } else {
+        setLoadingPaidProfile(true);
+      }
 
       const res = await axios.post(
-        `https://api.klimatenet.io/api/v1/user/PaidMembers?PageNumber=1&PageSize=10`,
+        `https://api.klimatenet.io/api/v1/user/PaidMembers?PageNumber=${page}&PageSize=10`,
         { searchCriteria: "" },
         {
           headers: {
@@ -82,12 +91,18 @@ const Home = () => {
         }
       );
 
-      setPaidProfile(res?.data?.result || []);
+      const newData = res?.data?.result || [];
+
+      setPaidProfile((prev) => (append ? [...prev, ...newData] : newData));
+
+      // if less than 10 → no more pages
+      setPaidHasMore(newData.length === 10);
     } catch (err) {
       console.error(err);
-      setPaidProfile([]);
+      if (!append) setPaidProfile([]);
     } finally {
       setLoadingPaidProfile(false);
+      setLoadingMorePaid(false);
     }
   };
 
@@ -114,27 +129,48 @@ const Home = () => {
     }
   };
 
-  const search = async (token, text = "") => {
-    try {
-      setLoadingAllMembers(true);
+  const handlePaidScroll = async (e) => {
+    const el = e.target;
 
+    if (loadingMorePaid || !paidHasMore) return;
+
+    if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 100) {
+      const t = await getValidToken();
+      if (!t) return;
+
+      const nextPage = paidPageNumber + 1;
+      setPaidPageNumber(nextPage);
+      paidMembers(t, nextPage, true);
+    }
+  };
+
+  const search = async (token, text = "", page = 1, append = false) => {
+    try {
+      if (append) {
+        setLoadingMore(true);
+      }
       const res = await axios.post(
-        `https://api.klimatenet.io/api/v1/user/search?PageNumber=1&PageSize=10`,
+        `https://api.klimatenet.io/api/v1/user/search?PageNumber=${page}&PageSize=10`,
         { searchCriteria: text },
         {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
-      setAllMembers(res?.data?.result || []);
+      const newData = res?.data?.result || [];
+
+      setAllMembers((prev) => (append ? [...prev, ...newData] : newData));
+
+      // if less than page size → no more data
+      setHasMore(newData.length === 10);
     } catch (err) {
       console.error(err);
-      setAllMembers([]);
+      if (!append) setAllMembers([]);
     } finally {
-      setLoadingAllMembers(false);
+      setLoadingMore(false);
     }
   };
 
@@ -154,7 +190,10 @@ const Home = () => {
     const runSearch = async () => {
       const t = await getValidToken();
       if (!t) return navigate("/login");
-      search(t, debouncedSearch);
+
+      setPageNumber(1);
+      setHasMore(true);
+      search(t, debouncedSearch, 1, false);
     };
 
     runSearch();
@@ -164,12 +203,34 @@ const Home = () => {
     const init = async () => {
       const t = await getValidToken();
       if (!t) return navigate("/login");
-      paidMembers(t);
-      search(t);
+
+      paidMembers(t, 1, false); // page 1
       userPersonlization(t);
     };
     init();
   }, []);
+
+  useEffect(() => {
+    const handleScroll = async () => {
+      if (loadingMore || !hasMore) return;
+
+      const scrollTop = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const fullHeight = document.documentElement.scrollHeight;
+
+      if (scrollTop + windowHeight >= fullHeight - 200) {
+        const t = await getValidToken();
+        if (!t) return;
+
+        const nextPage = pageNumber + 1;
+        setPageNumber(nextPage);
+        search(t, debouncedSearch, nextPage, true);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [pageNumber, loadingMore, hasMore, debouncedSearch]);
 
   return (
     <div className="home">
@@ -184,13 +245,16 @@ const Home = () => {
             onChange={handleSearch}
           />
           {searchText && (
-            <button className="clearBtn" onClick={() => handleSearch({ target: { value: "" } })}>
+            <button
+              className="clearBtn"
+              onClick={() => handleSearch({ target: { value: "" } })}
+            >
               ✖
             </button>
           )}
         </div>
       </div>
-      {!debouncedSearch &&
+      {!debouncedSearch && (
         <>
           <div>
             <h2 className="sectionTitle">Featured Members</h2>
@@ -225,7 +289,9 @@ const Home = () => {
 
                       <p className="company ellipsis">{user.companyname}</p>
                       <p className="job ellipsis">{user.designation}</p>
-                      <div className="infoRow ellipsis">📍 {user.location}</div>
+                      <div className="infoRow ellipsis">
+                        📍 {user.location}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -233,9 +299,9 @@ const Home = () => {
           </div>
           <div style={{ marginTop: "16px" }}>
             <h2 className="sectionTitle">Friend+, Patron, Project+ Members</h2>
-            <div className="paidRow">
-              {loadingPaidProfile
-                ? Array.from({ length: 10 }).map((_, i) => (
+            <div className="paidRow" onScroll={handlePaidScroll}>
+              {loadingPaidProfile ? (
+                Array.from({ length: 10 }).map((_, i) => (
                   <div className="paidCard skeleton" key={i}>
                     <div className="cardTop skeletonBox"></div>
                     <div className="cardBody">
@@ -247,7 +313,10 @@ const Home = () => {
                     </div>
                   </div>
                 ))
-                : paidProfile?.length === 0 ? <div className="noData">No data found</div> : paidProfile.map((user) => (
+              ) : paidProfile?.length === 0 ? (
+                <div className="noData">No data found</div>
+              ) : (
+                paidProfile.map((user) => (
                   <div className="paidCard" key={user.id}>
                     <div className="cardTop">
                       <img src={user.profilePic} alt={user.name} />
@@ -267,17 +336,50 @@ const Home = () => {
                       </div>
                     </div>
                   </div>
+                ))
+              )}
+              {loadingMorePaid &&
+                Array.from({ length: 10 }).map((_, i) => (
+                  <div className="paidCard skeleton" key={`paid-sk-${i}`}>
+                    <div className="cardTop skeletonBox"></div>
+                    <div className="cardBody">
+                      <div className="skeletonText title"></div>
+                      <div className="skeletonText"></div>
+                      <div className="skeletonText small"></div>
+                    </div>
+                  </div>
                 ))}
             </div>
           </div>
         </>
-      }
+      )}
       <div style={{ marginTop: "16px" }}>
         <h2 className="sectionTitle">All Members</h2>
         <div className={allMembers?.length === 0 ? "paidRow" : "paidRowAll"}>
-          {loadingAllMembers
-            ? Array.from({ length: 10 }).map((_, i) => (
-              <div className="paidCard skeleton" key={i}>
+          {allMembers.map((user) => (
+            <div className="paidCard" key={user.id}>
+              <div className="cardTop">
+                <img src={user.profilePic} alt={user.name} />
+                <span className={`role ${user.role?.toLowerCase()}`}>
+                  {user.role}
+                </span>
+              </div>
+
+              <div className="cardBody">
+                <h3 className="ellipsis">{user.name}</h3>
+                <p className="company ellipsis">{user.companyName}</p>
+                <p className="job ellipsis">{user.jobTitle}</p>
+                <div className="infoRow ellipsis">📍 {user.location}</div>
+                <div className="infoRow ellipsis">📧 {user.email}</div>
+                <div className="infoRow ellipsis">
+                  📞 {user.phoneCountryCode} {user.phoneNumber}
+                </div>
+              </div>
+            </div>
+          ))}
+          {loadingMore &&
+            Array.from({ length: 10 }).map((_, i) => (
+              <div className="paidCard skeleton" key={`sk-${i}`}>
                 <div className="cardTop skeletonBox"></div>
                 <div className="cardBody">
                   <div className="skeletonText title"></div>
@@ -285,27 +387,6 @@ const Home = () => {
                   <div className="skeletonText small"></div>
                   <div className="skeletonText small"></div>
                   <div className="skeletonText small"></div>
-                </div>
-              </div>
-            ))
-            : allMembers?.length === 0 ? <div className="noData">No data found</div> : allMembers.map((user) => (
-              <div className="paidCard" key={user.id}>
-                <div className="cardTop">
-                  <img src={user.profilePic} alt={user.name} />
-                  <span className={`role ${user.role?.toLowerCase()}`}>
-                    {user.role}
-                  </span>
-                </div>
-
-                <div className="cardBody">
-                  <h3 className="ellipsis">{user.name}</h3>
-                  <p className="company ellipsis">{user.companyName}</p>
-                  <p className="job ellipsis">{user.jobTitle}</p>
-                  <div className="infoRow ellipsis">📍 {user.location}</div>
-                  <div className="infoRow ellipsis">📧 {user.email}</div>
-                  <div className="infoRow ellipsis">
-                    📞 {user.phoneCountryCode} {user.phoneNumber}
-                  </div>
                 </div>
               </div>
             ))}
